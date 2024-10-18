@@ -1,4 +1,4 @@
-package fractions;
+package midterm_1;
 
 import java.util.Scanner;
 

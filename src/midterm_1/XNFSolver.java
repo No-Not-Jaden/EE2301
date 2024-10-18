@@ -1,4 +1,4 @@
-package boolean_expressions;
+package midterm_1;
 
 import java.util.ArrayList;
 import java.util.Arrays;

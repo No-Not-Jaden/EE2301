@@ -1,4 +1,4 @@
-package unknown_base;
+package midterm_1;
 
 import java.util.*;
 import java.util.stream.IntStream;

@@ -1,4 +1,4 @@
-package twos_compliment;
+package midterm_1;
 
 import java.util.Scanner;
 
