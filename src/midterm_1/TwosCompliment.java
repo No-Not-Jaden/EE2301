@@ -1,28 +1,56 @@
 package midterm_1;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class TwosCompliment {
 
     public static void main(String[] args) {
-
         prompt();
     }
 
     private static void prompt() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("What type of calculation do you want to do? Enter 1-2");
+        System.out.println("What type of calculation do you want to do? Enter 1-3");
         System.out.println("(1) Compliment of a number.");
         System.out.println("(2) Compliment subtraction.");
         System.out.println("(3) Range of representation.");
+        System.out.println("(4) Multiplication.");
+        System.out.println("(5) Addition.");
         int result = scanner.nextInt();
-        if (result == 1) {
-            promptCompliment();
-        } else if (result == 2){
-            promptSubtraction();
-        } else {
-            promptRange();
+        switch (result) {
+            case 1 -> promptCompliment();
+            case 2 -> promptSubtraction();
+            case 3 -> promptRange();
+            case 4 -> promptMultiplication();
+            case 5 -> promptAddition();
+            default -> prompt();
         }
+    }
+
+    private static void promptAddition() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Addition.");
+        System.out.println("What is the first number you want to add?");
+        String number1 = scanner.nextLine();
+        System.out.println("What is the second number you want to add?");
+        String number2 = scanner.nextLine();
+        System.out.println("What base are these numbers in?");
+        int base = scanner.nextInt();
+        add(number1, number2, base, -1);
+    }
+
+    private static void promptMultiplication() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Multiplication.");
+        System.out.println("What is the first number you want to multiply?");
+        String number1 = scanner.nextLine();
+        System.out.println("What is the second number you want to multiply?");
+        String number2 = scanner.nextLine();
+        System.out.println("What base are these numbers in?");
+        int base = scanner.nextInt();
+        multiply(number2, number1, base);
     }
 
     private static void promptRange(){
@@ -153,6 +181,50 @@ public class TwosCompliment {
             System.out.println("Cut off the digits that overflow -> " + output);
         }
         return output;
+    }
+
+    private static String quietAdd(String number1, String number2, int base) {
+        int num1 = Integer.parseInt(number1, base);
+        int num2 = Integer.parseInt(number2, base);
+        return Integer.toString(num1 + num2, base);
+    }
+
+    private static void multiply(String number1, String number2, int base) {
+        List<String> results = new ArrayList<>();
+        for (int i = number1.length() - 1; i >= 0; i--) {
+            int number1Base10Value = Character.getNumericValue(number1.charAt(i));
+            int number1Shifts = number1.length() - i - 1;
+            List<String> layerResults = new ArrayList<>();
+            for (int j = number2.length() - 1; j >= 0; j--) {
+                int number2Base10Value = Character.getNumericValue(number2.charAt(j));
+                int number2Shifts = number2.length() - j - 1;
+                String result = Integer.toString(number1Base10Value * number2Base10Value, base);
+                layerResults.add(result + "0".repeat(number1Shifts + number2Shifts));
+            }
+
+            String total = "0";
+            for (String num : layerResults) {
+                total = quietAdd(num, total, base);
+            }
+            results.add(total);
+        }
+        String total = "0";
+        for (String num : results) {
+            total = quietAdd(num, total, base);
+        }
+        System.out.println(" ".repeat(total.length() + 2 - number2.length()) + number2);
+        System.out.println(" ".repeat(total.length() - number1.length()) + "x " + number1);
+        System.out.println("-".repeat(total.length() + 2));
+        for (int i = 0; i < results.size(); i++) {
+            String num = results.get(i);
+            if (i != results.size() - 1) {
+                System.out.println(" ".repeat(total.length() + 2 - num.length()) + num);
+            } else {
+                System.out.println(" ".repeat(total.length() - num.length()) + "+ " + num);
+            }
+        }
+        System.out.println("-".repeat(total.length() + 2));
+        System.out.println("  " + total);
     }
 
 }

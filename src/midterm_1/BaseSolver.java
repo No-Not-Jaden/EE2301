@@ -76,10 +76,62 @@ record Expression(double[] numbers, char[] operators) {
 public class BaseSolver {
 
     public static void main(String[] args) {
-        System.out.println(promptBase());
+        prompt();
     }
 
-    private static double promptBase() {
+    private static void prompt() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("What would you like to do? Enter 1-2");
+        System.out.println("(1) Solve for a base.");
+        System.out.println("(2) Solve using a known base.");
+        int input = scanner.nextInt();
+        if (input == 1) {
+            promptBase();
+        } else {
+            promptMath();
+        }
+    }
+
+    private static void promptMath() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("What base should the operation be performed in?");
+        double base = scanner.nextDouble(); scanner.nextLine();
+        System.out.println("Please type in an expression with one solution on the right. Separate operators with spaces. Ex: 123 + 123 = 246");
+        String input = scanner.nextLine();
+        List<String> numbers = new ArrayList<>();
+        List<Character> operators = new ArrayList<>();
+        while (input.contains(" ")) {
+            String currentChunk = input.substring(0, input.indexOf(" "));
+            input = input.substring(currentChunk.length() + 1);
+            if (currentChunk.equals("+") || currentChunk.equals("-")
+                    || currentChunk.equals("*") || currentChunk.equals("/")
+                    || currentChunk.equals("^")) {
+                operators.add(currentChunk.charAt(0));
+            } else if (!currentChunk.equals("=")) {
+                numbers.add(currentChunk);
+            }
+        }
+        numbers.add(input);
+        String[] newNumbers = numbers.toArray(new String[0]);
+        double[] base10Values = new double[newNumbers.length];
+        char[] newOperators = new char[operators.size()];
+        IntStream.range(0, operators.size()).forEach(i -> newOperators[i] = operators.get(i));
+        System.out.print("Base 10: ");
+        for (int i = 0; i < base10Values.length; i++) {
+            base10Values[i] = getBase10Value(newNumbers[i], base);
+            if (i != 0)
+                System.out.print(newOperators[i-1]);
+            System.out.print(base10Values[i]);
+        }
+        Expression expression = new Expression(base10Values, newOperators);
+        double result = expression.performExpression();
+        System.out.println(" = " + result);
+
+        // could use the fractions class to print decimals in this base
+        System.out.println("Base " + base + " result = " + Integer.toString((int) result, (int) base));
+    }
+
+    private static void promptBase() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Please type in an expression with one solution on the right. Separate operators with spaces. Ex: 123 + 123 = 246");
         String input = scanner.nextLine();
@@ -103,7 +155,8 @@ public class BaseSolver {
         double base = calculateBase(newNumbers, newOperators, input);
         if (base == 0.0)
             System.out.println("There is no common base between terms, or the base is above " + MAX_BASE);
-        return base;
+        else
+            System.out.println("The base is: " + base);
     }
 
     private static final double MAX_BASE = 100;
