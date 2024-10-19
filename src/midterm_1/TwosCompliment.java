@@ -14,12 +14,27 @@ public class TwosCompliment {
         System.out.println("What type of calculation do you want to do? Enter 1-2");
         System.out.println("(1) Compliment of a number.");
         System.out.println("(2) Compliment subtraction.");
+        System.out.println("(3) Range of representation.");
         int result = scanner.nextInt();
         if (result == 1) {
             promptCompliment();
-        } else {
+        } else if (result == 2){
             promptSubtraction();
+        } else {
+            promptRange();
         }
+    }
+
+    private static void promptRange(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Range of representation.");
+        System.out.println("How many digits do you have?");
+        int digits = scanner.nextInt();
+        System.out.println("What base should be used?");
+        int base = scanner.nextInt();
+        long[] range = getRange(digits, base);
+        System.out.println(digits + " digits in base " + base + " have a total of " + range[0] + " different combinations.");
+        System.out.println("The range would be (" + range[1] + "," + range[2] + ")");
     }
 
     private static void promptSubtraction() {
@@ -46,6 +61,13 @@ public class TwosCompliment {
         int maxDigits = scanner.nextInt();
         if (number.length() < maxDigits) number = "0".repeat(maxDigits - number.length()) + number;
         System.out.println("The compliment of " + number + " is " + getCompliment(number, base) + " in base " + base);
+    }
+
+    private static long[] getRange(int digits, int base) {
+        long total = (long) Math.pow(base, digits);
+        long lower = Math.floorDiv(total, 2) * -1L;
+        long higher = total + lower - 1;
+        return new long[]{total, lower, higher};
     }
 
     private static void subtractionWalkthrough(String number1, String number2, int base, int maxDigits) {

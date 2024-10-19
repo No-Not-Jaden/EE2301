@@ -7,10 +7,10 @@ import java.util.Scanner;
 
 public class XNFSolver {
     public static void main(String[] args) {
-        promptXNF();
+        prompt();
     }
 
-    public static void promptXNF() {
+    private static void prompt() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("How would you like to input your truth table? Enter 1-2");
         System.out.println("(1) Intuitive way.");
@@ -28,7 +28,9 @@ public class XNFSolver {
         }
         System.out.println("\n\n\n\n\n");
         printTruthTable(Arrays.stream(orderedResults).boxed().toList(), 0);
-        System.out.println("f = " + termsToString(computeXNF(orderedResults)));
+        System.out.println("XNF: " + termsToStringXNF(computeXNF(orderedResults)));
+        System.out.println("Sum of Products (AND-OR): " + termsToString(normalForm(orderedResults, true), true));
+        System.out.println("Product of Sums (OR-AND): " + termsToString(normalForm(orderedResults, false), false));
     }
 
     private static int[] promptFastResults() {
@@ -119,14 +121,14 @@ public class XNFSolver {
                 boolean expectedResult = orderedResults[i] == 1;
                 if (getResult(i, terms, numInputs) != expectedResult) {
                     // add to expression
-                    terms.add(numToTerm(i, numInputs));
+                    terms.add(numToTermXNF(i, numInputs));
                 }
             }
         }
         return terms;
     }
 
-    private static int[] numToTerm(int num, int numInputs) {
+    private static int[] numToTermXNF(int num, int numInputs) {
         String binary = integerStringRepresentation(num, numInputs);
         int[] term = new int[binary.replace("0", "").length()];
         if (term.length == 0)
@@ -140,6 +142,35 @@ public class XNFSolver {
             }
         }
         return term;
+    }
+
+    private static int[] numToTerm(int num, int numInputs, boolean invert) {
+        String binary = integerStringRepresentation(num, numInputs);
+        int[] term = new int[binary.length()];
+        if (term.length == 0)
+            return new int[]{0};
+        for (int i = 0; i < binary.length(); i++) {
+            // 'i' represents the input variable number - 1
+            if (invert ^ binary.charAt(i) == '1') {
+                term[i] = i+1;
+            } else {
+                term[i] = -1 * (i + 1);
+            }
+        }
+        return term;
+    }
+
+    private static List<int[]> normalForm(int[] orderedResults, boolean sumOfProducts) {
+        int numInputs = (int) Math.ceil(Math.log(orderedResults.length) / Math.log(2));
+        List<int[]> terms = new ArrayList<>();
+        for (int i = 0; i < orderedResults.length; i++) {
+            if (sumOfProducts && orderedResults[i] == 1) {
+                terms.add(numToTerm(i, numInputs, false));
+            } else if (!sumOfProducts && orderedResults[i] == 0){
+                terms.add(numToTerm(i, numInputs, true));
+            }
+        }
+        return terms;
     }
 
     private static String integerStringRepresentation(int num, int length) {
@@ -190,12 +221,41 @@ public class XNFSolver {
      * @param terms A list of AND terms.
      * @return A string representation of the expression.
      */
-    private static String termsToString(List<int[]> terms) {
+    private static String termsToStringXNF(List<int[]> terms) {
         StringBuilder builder = new StringBuilder();
         for (int[] term : terms) {
             if (!builder.isEmpty())
                 builder.append(" ⊕ ");
             for (int variable : term) {
+                if (variable == 0) {
+                    builder.append(1);
+                } else {
+                    if (variable > 0)
+                        builder.append('x');
+                    else
+                        builder.append("x̄");
+                    builder.append(Math.abs(variable));
+                }
+            }
+        }
+        return builder.toString();
+    }
+
+    private static String termsToString(List<int[]> terms, boolean sumOfProducts) {
+        StringBuilder builder = new StringBuilder();
+        for (int[] term : terms) {
+            if (!builder.isEmpty()) {
+                if (sumOfProducts) {
+                    builder.append(" + ");
+                } else {
+                    builder.append(" • ");
+                }
+            }
+            for (int i = 0; i < term.length; i++) {
+                if (i != 0 && !sumOfProducts) {
+                    builder.append('+');
+                }
+                int variable = term[i];
                 if (variable == 0) {
                     builder.append(1);
                 } else {
